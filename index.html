@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ice Hockey - 1v1</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background: #111;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Press Start 2P', monospace;
+            touch-action: none;
+        }
+
+        #ustdizayn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #ustbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        #bospixelayari {
+            image-rendering: pixelated;
+        }
+
+        #resetBtn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+            transition: opacity 0.15s;
+        }
+
+            #resetBtn:hover {
+                opacity: 1;
+            }
+
+            #resetBtn:active {
+                opacity: 0.4;
+            }
+
+            #resetBtn svg {
+                image-rendering: pixelated;
+            }
+
+        #anasaha {
+            image-rendering: pixelated;
+            cursor: none;
+        }
+
+        #goalOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+            #goalOverlay.show {
+                display: flex;
+            }
+
+        #goalText {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 48px;
+            color: #fff;
+            text-shadow: 0 0 30px #ffeb3b, 0 0 60px #ff9800, 0 0 90px #f44336;
+            animation: goalPulse 0.4s ease-in-out infinite alternate;
+        }
+
+        #madebykismi {
+            position: fixed;
+            right: 15px;
+            bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10; 
+            pointer-events: auto;
+        }
+
+            #madebykismi:hover {
+                opacity: 1;
+            }
+
+        .kose-img {
+            height: 48px;
+            width: auto;
+            image-rendering: pixelated;
+        }
+
+        .kose-yazi {
+            height: 24px;
+            width: auto;
+            image-rendering: pixelated;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="ustdizayn">
+        <div id="ustbar">
+            <canvas id="bospixelayari"></canvas>
+            <!--ERVA NEDEN REDETTİN BAŞKANI?-->
+            <button id="resetBtn" title="Sıfırla">
+                <!--ama saygılı redetmeni beklemezdim-->
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+                    <!-- Üst kısım -->
+                    <rect x="3" y="1" width="2" height="2" fill="#aaa" />
+                    <rect x="5" y="1" width="2" height="2" fill="#aaa" />
+                    <rect x="7" y="1" width="2" height="2" fill="#aaa" />
+                    <rect x="9" y="1" width="2" height="2" fill="#aaa" />
+                    <rect x="11" y="1" width="2" height="2" fill="#aaa" />
+                    <!-- Sağ taraf -->
+                    <rect x="11" y="3" width="2" height="2" fill="#aaa" />
+                    <rect x="9" y="3" width="2" height="2" fill="#aaa" />
+                    <!-- Sol taraf -->
+                    <rect x="1" y="3" width="2" height="2" fill="#aaa" />
+                    <rect x="1" y="5" width="2" height="2" fill="#aaa" />
+                    <rect x="1" y="7" width="2" height="2" fill="#aaa" />
+                    <rect x="1" y="9" width="2" height="2" fill="#aaa" />
+                    <rect x="1" y="11" width="2" height="2" fill="#aaa" />
+                    <!-- Alt kısım -->
+                    <rect x="3" y="13" width="2" height="2" fill="#aaa" />
+                    <rect x="5" y="13" width="2" height="2" fill="#aaa" />
+                    <rect x="7" y="13" width="2" height="2" fill="#aaa" />
+                    <rect x="9" y="13" width="2" height="2" fill="#aaa" />
+                    <rect x="11" y="13" width="2" height="2" fill="#aaa" />
+                    <!-- Sağ taraf 2 -->
+                    <rect x="13" y="3" width="2" height="2" fill="#aaa" />
+                    <rect x="13" y="5" width="2" height="2" fill="#aaa" />
+                    <rect x="13" y="7" width="2" height="2" fill="#aaa" />
+                    <!-- Ok başı (sağ üst) -->
+                    <rect x="11" y="5" width="2" height="2" fill="#aaa" />
+                    <rect x="9" y="5" width="2" height="2" fill="#aaa" />
+                    <rect x="13" y="5" width="2" height="2" fill="#aaa" />
+                </svg>
+            </button>
+        </div>
+
+        <canvas id="anasaha"></canvas>
+    </div>
+
+    <div id="goalOverlay">
+        <div id="goalText">GOL!</div>
+    </div>
+
+    <div id="madebykismi">
+        <a href="https://github.com/Hipatupon" target="_blank">
+            <img src="tasarımlar/logo.png" alt="Logo" class="kose-img">
+            <img src="tasarımlar/ad-pixel.png" alt="Ad Pixel" class="kose-yazi">
+        </a>
+    </div>
+
+    <script>
+        const assets = {};
+        const assetList = [
+        { name: 'saha', src: 'tasarımlar/saha.png' },
+        { name: 'disk', src: 'tasarımlar/top.png' },
+        { name: 'ctrlred', src: 'tasarımlar/ctrl_red.png' },
+        { name: 'ctrlblue', src: 'tasarımlar/ctrl_blue.png' },
+        { name: 'scoreboard', src: 'tasarımlar/scoreboard.png' }
+        ];
+        let assetsLoaded = 0;
+
+        function loadAssets(cb) {
+        for (const a of assetList) {
+        const img = new Image();
+        img.onload = () => {
+        assets[a.name] = img;
+        if (++assetsLoaded === assetList.length) cb();
+        };
+        img.onerror = () => {
+        console.error('Yüklenemedi:', a.src);
+        if (++assetsLoaded === assetList.length) cb();
+        };
+        img.src = a.src;
+        }
+        }
+
+        const canvas = document.getElementById('anasaha');
+        const ctx = canvas.getContext('2d');
+        const sbCanvas = document.getElementById('bospixelayari');
+        const sbCtx = sbCanvas.getContext('2d');
+
+        const SAHA_OW = 192, SAHA_OH = 108;
+        const DISK_OD = 20;
+        const CTRLRED_OD = 16;
+        const CTRLBLUE_OD = 16;
+        const SB_OW = 48, SB_OH = 24;
+
+        let S = 1;
+        let W, H;
+        let DISK_R;
+        let CTRL_R_RED;
+        let CTRL_R_BLUE;
+        let GOAL_H;
+        let GOAL_DISK;
+        let GOAL_BOTTOM;
+        let BORDER;          // YOK EFENDİM NEYMİŞ LET'SİZ OLMAZMIŞ BEN BÖYLE ŞEYİ *** 3 SAAT KAYBETTİM ŞUNLAR YÜZÜNDEN
+
+        function resize() {
+        const pad = 8;
+        const sbEstH = 50;
+        const availW = window.innerWidth - pad * 2;
+        const availH = window.innerHeight - pad * 2 - sbEstH - 4;
+
+        S = Math.min(availW / SAHA_OW, availH / SAHA_OH);
+        if (S < 1) S = 1;
+
+        W = Math.floor(SAHA_OW * S);
+        H = Math.floor(SAHA_OH * S);
+        canvas.width = W;
+        canvas.height = H;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.imageSmoothingEnabled = false;
+
+        const sbTargetW = Math.floor(W * 0.35);
+        const sbScale = sbTargetW / SB_OW;
+        const sbW = Math.floor(SB_OW * sbScale);
+        const sbH = Math.floor(SB_OH * sbScale);
+        sbCanvas.width = sbW;
+        sbCanvas.height = sbH;
+        sbCanvas.style.width = sbW + 'px';
+        sbCanvas.style.height = sbH + 'px';
+        sbCtx.imageSmoothingEnabled = false;
+
+        const resetBtn = document.getElementById('resetBtn');
+        const resetSvg = resetBtn.querySelector('svg');
+        resetSvg.setAttribute('width', Math.floor(sbH * 0.7));
+        resetSvg.setAttribute('height', Math.floor(sbH * 0.7));
+
+        DISK_R = (DISK_OD / 2) * S;
+        CTRL_R_RED = (CTRLRED_OD / 2) * S;
+        CTRL_R_BLUE = (CTRLBLUE_OD / 2) * S;
+
+        GOAL_H = H * 0.33;
+        GOAL_DISK = (H - GOAL_H) / 2;
+        GOAL_BOTTOM = GOAL_DISK + GOAL_H;
+
+        BORDER = Math.max(3, 5 * S);
+
+        const totalH = sbH + 4 + H;
+        if (totalH > window.innerHeight - pad * 2) {
+        const shrink = (window.innerHeight - pad * 2) / totalH;
+        S *= shrink;
+
+        W = Math.floor(SAHA_OW * S);
+        H = Math.floor(SAHA_OH * S);
+        canvas.width = W;
+        canvas.height = H;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.imageSmoothingEnabled = false;
+
+        const sbTargetW2 = Math.floor(W * 0.35);
+        const sbScale2 = sbTargetW2 / SB_OW;
+        const sbW2 = Math.floor(SB_OW * sbScale2);
+        const sbH2 = Math.floor(SB_OH * sbScale2);
+        sbCanvas.width = sbW2;
+        sbCanvas.height = sbH2;
+        sbCanvas.style.width = sbW2 + 'px';
+        sbCanvas.style.height = sbH2 + 'px';
+        sbCtx.imageSmoothingEnabled = false;
+
+        resetSvg.setAttribute('width', Math.floor(sbH2 * 0.7));
+        resetSvg.setAttribute('height', Math.floor(sbH2 * 0.7));
+
+        DISK_R = (DISK_OD / 2) * S;
+        CTRL_R_RED = (CTRLRED_OD / 2) * S;
+        CTRL_R_BLUE = (CTRLBLUE_OD / 2) * S;
+        GOAL_H = H * 0.33;
+        GOAL_DISK = (H - GOAL_H) / 2;
+        GOAL_BOTTOM = GOAL_DISK + GOAL_H;
+        BORDER = Math.max(3, 5 * S);
+        }
+
+        updateScoreboard();
+        }
+
+
+
+        let scoreRed = 0, scoreBlue = 0;
+        let goalCooldown = false;
+        let disk = { x: 0, y: 0, vx: 0, vy: 0 };
+        let m1 = { x: 0, y: 0, vx: 0, vy: 0, tid: null, px: 0, py: 0 };
+        let m2 = { x: 0, y: 0, vx: 0, vy: 0, tid: null, px: 0, py: 0 };  //ALLAHIN CEZASI LET'LER 2
+
+        function resetPositions() {
+        disk.x = W / 2; disk.y = H / 2; disk.vx = 0; disk.vy = 0;
+
+        m1.x = W * 0.18; m1.y = H / 2;
+        m1.vx = 0; m1.vy = 0; m1.px = m1.x; m1.py = m1.y; m1.tid = null;
+
+        m2.x = W * 0.82; m2.y = H / 2;
+        m2.vx = 0; m2.vy = 0; m2.px = m2.x; m2.py = m2.y; m2.tid = null;
+        }
+
+        function fullReset() {
+        scoreRed = 0; scoreBlue = 0;
+        updateScoreboard();
+        resetPositions();
+        }
+
+        function updateScoreboard() {
+        if (!assets.scoreboard) return;
+
+        const w = sbCanvas.width, h = sbCanvas.height;
+        sbCtx.clearRect(0, 0, w, h);
+        sbCtx.drawImage(assets.scoreboard, 0, 0, w, h);
+
+        const fontSize = Math.floor(h * 0.45);
+        sbCtx.font = `${fontSize}px 'Press Start 2P', monospace`;
+        sbCtx.textAlign = 'center';
+        sbCtx.textBaseline = 'middle';
+        sbCtx.fillStyle = '#fff';
+
+        sbCtx.fillText(scoreRed.toString(), w * 0.25, h * 0.5);
+        sbCtx.fillText(scoreBlue.toString(), w * 0.75, h * 0.5);
+
+        }
+
+        function draw() {
+        ctx.clearRect(0, 0, W, H);
+
+        if (assets.saha) ctx.drawImage(assets.saha, 0, 0, W, H);
+
+        if (assets.disk) {
+        const d = DISK_OD * S;
+        ctx.drawImage(assets.disk, disk.x - d / 2, disk.y - d / 2, d, d);
+        }
+
+        if (assets.ctrlred) {
+        const d = CTRLRED_OD * S;
+        ctx.drawImage(assets.ctrlred, m1.x - d / 2, m1.y - d / 2, d, d);
+        }
+
+        if (assets.ctrlblue) {
+        const d = CTRLBLUE_OD * S;
+        ctx.drawImage(assets.ctrlblue, m2.x - d / 2, m2.y - d / 2, d, d);
+        }
+        }
+
+        const FRICTION = 0.991;
+        const WALL_BOUNCE = 0.6;
+        const HIT_FACTOR = 0.5;
+
+        function getMaxSpeed() {
+        return S * 1.8;
+        }
+
+        function clampDiskSpeed() {
+        const ms = getMaxSpeed();
+        const sp = Math.sqrt(disk.vx * disk.vx + disk.vy * disk.vy);
+        if (sp > ms) {
+        disk.vx = (disk.vx / sp) * ms;
+        disk.vy = (disk.vy / sp) * ms;
+        }
+        }
+
+        function updateDisk() {
+        if (goalCooldown) return;
+
+        disk.x += disk.vx;
+        disk.y += disk.vy;
+
+        disk.vx *= FRICTION;
+        disk.vy *= FRICTION;
+
+        clampDiskSpeed();
+
+        const r = DISK_R;
+
+        if (disk.y - r < BORDER) {
+        disk.y = r + BORDER;
+        disk.vy = Math.abs(disk.vy) * WALL_BOUNCE;
+        }
+
+        if (disk.y + r > H - BORDER) {
+        disk.y = H - r - BORDER;
+        disk.vy = -Math.abs(disk.vy) * WALL_BOUNCE;
+        }
+
+        const inGoalY = disk.y > GOAL_DISK && disk.y < GOAL_BOTTOM;
+
+        if (disk.x - r < BORDER) {
+        if (inGoalY) {
+        if (disk.x + r < 0) { goalScored('blue'); return; }
+        if (disk.y - r < GOAL_DISK) { disk.y = GOAL_DISK + r; disk.vy = Math.abs(disk.vy) * WALL_BOUNCE; }
+        if (disk.y + r > GOAL_BOTTOM) { disk.y = GOAL_BOTTOM - r; disk.vy = -Math.abs(disk.vy) * WALL_BOUNCE; }
+        } else {
+        disk.x = r + BORDER;
+        disk.vx = Math.abs(disk.vx) * WALL_BOUNCE;
+        }
+        }
+
+        if (disk.x + r > W - BORDER) {
+        if (inGoalY) {
+        if (disk.x - r > W) { goalScored('red'); return; }
+        if (disk.y - r < GOAL_DISK) { disk.y = GOAL_DISK + r; disk.vy = Math.abs(disk.vy) * WALL_BOUNCE; }
+        if (disk.y + r > GOAL_BOTTOM) { disk.y = GOAL_BOTTOM - r; disk.vy = -Math.abs(disk.vy) * WALL_BOUNCE; }
+        } else {
+        disk.x = W - r - BORDER;
+        disk.vx = -Math.abs(disk.vx) * WALL_BOUNCE;
+        }
+        }
+
+        const cr = BORDER * 2.2; // Köşe yarıçapı
+        bCorner(disk, r, BORDER + cr, BORDER + cr, cr);
+        bCorner(disk, r, W - BORDER - cr, BORDER + cr, cr);
+        bCorner(disk, r, BORDER + cr, H - BORDER - cr, cr);
+        bCorner(disk, r, W - BORDER - cr, H - BORDER - cr, cr);
+
+        if (Math.abs(disk.vx) < 0.02) disk.vx = 0;
+        if (Math.abs(disk.vy) < 0.02) disk.vy = 0;
+        }
+
+        function bCorner(o, oR, cx, cy, rad) {
+        const icx = (cx < W / 2) ? (o.x < cx) : (o.x > cx);
+        const icy = (cy < H / 2) ? (o.y < cy) : (o.y > cy);
+        if (!icx || !icy) return;
+
+        const dx = o.x - cx, dy = o.y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const md = rad - oR;
+
+        if (dist > md && dist > 0) {
+        const nx = dx / dist, ny = dy / dist;
+        o.x = cx + nx * md;
+        o.y = cy + ny * md;
+
+        const dot = o.vx * nx + o.vy * ny;
+        if (dot > 0) {
+        o.vx -= 2 * dot * nx;
+        o.vy -= 2 * dot * ny;
+        o.vx *= WALL_BOUNCE;
+        o.vy *= WALL_BOUNCE;
+        }
+        }
+        }
+
+        function malletHit(m, mr) {
+        const dx = disk.x - m.x, dy = disk.y - m.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const minD = DISK_R + mr;
+
+        if (dist < minD && dist > 0) {
+        const nx = dx / dist, ny = dy / dist;
+        disk.x += nx * (minD - dist);
+        disk.y += ny * (minD - dist);
+
+        const rvx = disk.vx - m.vx, rvy = disk.vy - m.vy;
+        const rd = rvx * nx + rvy * ny;
+
+        if (rd < 0) {
+        disk.vx -= rd * nx * (1 + HIT_FACTOR);
+        disk.vy -= rd * ny * (1 + HIT_FACTOR);
+        disk.vx += m.vx * 0.15;
+        disk.vy += m.vy * 0.15;
+        }
+
+        clampDiskSpeed();
+        }
+        }
+
+        function constrain(m, isLeft, mr) {
+        if (m.y < BORDER + mr) m.y = BORDER + mr;
+        if (m.y > H - BORDER - mr) m.y = H - BORDER - mr;
+
+        if (isLeft) {
+        if (m.x < BORDER + mr) m.x = BORDER + mr;
+        if (m.x > W / 2 - mr) m.x = W / 2 - mr;
+        } else {  //Zeynep Aslı'yı seviom
+        if (m.x < W / 2 + mr) m.x = W / 2 + mr;
+        if (m.x > W - BORDER - mr) m.x = W - BORDER - mr;
+        }
+        }
+
+        function goalScored(team) {
+        if (goalCooldown) return;
+        goalCooldown = true;
+
+        if (team === 'red') scoreRed++; else scoreBlue++;
+        updateScoreboard();
+
+        document.getElementById('goalOverlay').classList.add('show');
+
+        setTimeout(() => {
+        document.getElementById('goalOverlay').classList.remove('show');
+        goalCooldown = false;
+        resetPositions();
+        }, 1400);
+        }
+
+
+        function gtp(e) {
+        const r = canvas.getBoundingClientRect();
+        const sx = W / r.width, sy = H / r.height;
+
+        if (e.changedTouches) {
+        const res = [];
+        for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        res.push({
+        x: (t.clientX - r.left) * sx,
+        y: (t.clientY - r.top) * sy,
+        id: t.identifier
+        });
+        }
+        return res;
+        }
+        return [{ x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy, id: -1 }];
+        }
+
+        function mv(m, tx, ty, isLeft, mr) {
+        m.px = m.x; m.py = m.y;
+        m.x = tx; m.y = ty;
+        constrain(m, isLeft, mr);
+        m.vx = m.x - m.px;
+        m.vy = m.y - m.py;
+        }
+
+
+        canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        for (const t of gtp(e)) {
+        if (t.x < W / 2 && m1.tid === null) {
+        m1.tid = t.id;
+        mv(m1, t.x, t.y, true, CTRL_R_RED);
+        }
+        else if (t.x >= W / 2 && m2.tid === null) {
+        m2.tid = t.id;
+        mv(m2, t.x, t.y, false, CTRL_R_BLUE);
+        }
+        }
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        for (const t of gtp(e)) {
+        if (t.id === m1.tid) mv(m1, t.x, t.y, true, CTRL_R_RED);
+        else if (t.id === m2.tid) mv(m2, t.x, t.y, false, CTRL_R_BLUE);
+        }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        for (const t of gtp(e)) {
+        if (t.id === m1.tid) { m1.tid = null; m1.vx = 0; m1.vy = 0; }
+        if (t.id === m2.tid) { m2.tid = null; m2.vx = 0; m2.vy = 0; }
+        }
+        }, { passive: false });
+
+        canvas.addEventListener('touchcancel', (e) => {
+        e.preventDefault();
+        m1.tid = null; m1.vx = 0; m1.vy = 0;
+        m2.tid = null; m2.vx = 0; m2.vy = 0;
+        }, { passive: false });
+
+        let activeMouse = null; 
+
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        canvas.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const p = gtp(e)[0];
+        if (p.x < W / 2) {
+        activeMouse = 'L';
+        mv(m1, p.x, p.y, true, CTRL_R_RED);
+        } else {
+        activeMouse = 'R';
+        mv(m2, p.x, p.y, false, CTRL_R_BLUE);
+        }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+        if (!activeMouse) return; 
+        e.preventDefault();
+        const p = gtp(e)[0];
+        if (activeMouse === 'L') mv(m1, p.x, p.y, true, CTRL_R_RED);
+        else mv(m2, p.x, p.y, false, CTRL_R_BLUE);
+        });
+
+        canvas.addEventListener('mouseup', () => {
+        if (activeMouse === 'L') { m1.vx = 0; m1.vy = 0; }
+        if (activeMouse === 'R') { m2.vx = 0; m2.vy = 0; }
+        activeMouse = null;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+        if (activeMouse === 'L') { m1.vx = 0; m1.vy = 0; }
+        if (activeMouse === 'R') { m2.vx = 0; m2.vy = 0; }
+        activeMouse = null;
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', fullReset);
+
+        function loop() {
+        updateDisk();
+        malletHit(m1, CTRL_R_RED);
+        malletHit(m2, CTRL_R_BLUE);
+        draw();
+        requestAnimationFrame(loop);
+        }
+
+        loadAssets(() => {
+        resize();
+        window.addEventListener('resize', resize);
+        resetPositions();
+        updateScoreboard();
+        loop();
+        });
+    </script>
+</body>
+</html>
