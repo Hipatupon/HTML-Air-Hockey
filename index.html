@@ -347,7 +347,7 @@
         sbCtx.font = `${fontSize}px 'Press Start 2P', monospace`;
         sbCtx.textAlign = 'center';
         sbCtx.textBaseline = 'middle';
-        sbCtx.fillStyle = '#fff';
+        sbCtx.fillStyle = '#181818';
 
         sbCtx.fillText(scoreRed.toString(), w * 0.25, h * 0.5);
         sbCtx.fillText(scoreBlue.toString(), w * 0.75, h * 0.5);
@@ -439,7 +439,7 @@
         }
         }
 
-        const cr = BORDER * 2.2; // Köşe yarıçapı
+        const cr = BORDER * 2.2;
         bCorner(disk, r, BORDER + cr, BORDER + cr, cr);
         bCorner(disk, r, W - BORDER - cr, BORDER + cr, cr);
         bCorner(disk, r, BORDER + cr, H - BORDER - cr, cr);
