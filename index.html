@@ -175,24 +175,24 @@
     </div>
 
     <div id="goalOverlay">
-        <div id="goalText">GOL!</div>
+        <div id="goalText">GOAL!</div>
     </div>
 
     <div id="madebykismi">
         <a href="https://github.com/Hipatupon" target="_blank">
-            <img src="tasarımlar/logo.png" alt="Logo" class="kose-img">
-            <img src="tasarımlar/ad-pixel.png" alt="Ad Pixel" class="kose-yazi">
+            <img src="designs/logo.png" alt="Logo" class="kose-img">
+            <img src="designs/name-pixel.png" alt="Ad Pixel" class="kose-yazi">
         </a>
     </div>
 
     <script>
         const assets = {};
         const assetList = [
-        { name: 'saha', src: 'tasarımlar/saha.png' },
-        { name: 'disk', src: 'tasarımlar/top.png' },
-        { name: 'ctrlred', src: 'tasarımlar/ctrl_red.png' },
-        { name: 'ctrlblue', src: 'tasarımlar/ctrl_blue.png' },
-        { name: 'scoreboard', src: 'tasarımlar/scoreboard.png' }
+            { name: 'saha', src: 'designs/area.png' },
+            { name: 'disk', src: 'designs/ball.png' },
+            { name: 'ctrlred', src: 'designs/ctrl_red.png' },
+            { name: 'ctrlblue', src: 'designs/ctrl_blue.png' },
+            { name: 'scoreboard', src: 'designs/scoreboard.png' }
         ];
         let assetsLoaded = 0;
 
@@ -204,7 +204,7 @@
         if (++assetsLoaded === assetList.length) cb();
         };
         img.onerror = () => {
-        console.error('Yüklenemedi:', a.src);
+        console.error('Error:', a.src);
         if (++assetsLoaded === assetList.length) cb();
         };
         img.src = a.src;
